@@ -1,6 +1,11 @@
 var express     = require("express");
 var bodyParser  = require("body-parser");
 var path        = require("path");
+var mongoose		= require("mongoose");
+var config			= require("./backend/config");
+
+var User 				= require("./backend/models/user");
+var Book 				= require("./backend/models/book");
 
 var app = express();
 var userRouter = express.Router();
@@ -10,6 +15,10 @@ app.use(bodyParser.json({extended:"true"}));
 
 app.use(express.static(path.join(__dirname,"public_www")));
 
+mongoose.Promise = global.Promise;
+mongoose.connect(config.database, {useMongoClient:true});
+
+/**
 var userList = [{user:"admin", password:"admin", admin:1}];
 var bookList = [{
 			author:"Kiayada Delacruz",
@@ -48,46 +57,73 @@ var bookList = [{
       loaned: ""
 		}
 ];
+*/
 
 app.post("/login", function(req, res){
-  var found = false;
-  for(var i = 0; i < userList.length; i++){
-    if(req.body.userName == userList[i].user){
-      found = true;
-    }
-    if(found){
-      if(req.body.pword == userList[i].password){
-        if(userList[i].admin == 1){
-          res.json({token:"admin", user:userList[i].user});
-          return;
-        }else {
-          res.json({token:"user", user:userList[i].user});
-          return;
-        }
-      }
-    }
-  }
-  res.send("No luck");
+  // var found = false;
+  // for(var i = 0; i < userList.length; i++){
+  //   if(req.body.userName == userList[i].user){
+  //     found = true;
+  //   }
+  //   if(found){
+  //     if(req.body.pword == userList[i].password){
+  //       if(userList[i].admin == 1){
+  //         res.json({token:"admin", user:userList[i].user});
+  //         return;
+  //       }else {
+  //         res.json({token:"user", user:userList[i].user});
+  //         return;
+  //       }
+  //     }
+  //   }
+	User.findOne({userName:req.body.userName}, function(err, user){
+		if(err){
+			throw err;
+		}
+		if(user){
+			if(user.admin == 1){
+				res.json({token:"admin", user:user.userName});
+				return;
+			}else{
+				res.json({token:"user", user:user.userName});
+				return;
+			}
+		}else {
+			res.status(403).send("No luck. Luke.");			
+		}
+	});
 });
 
 app.post("/newUser", function(req,res){
   var userName = req.body.userName;
   var pword = req.body.pword;
 
-  for(var i = 0; i < userList.length; i++ ){
-    if(req.body.userName == userList[i].user){
-      res.send("Failure. User already exists.");
-      return;
-    }
-  }
+	console.log(userName);
+	console.log(pword);
+	var newUser = new User({userName:userName, pword:pword, admin:0});
 
-  var user = {user:userName,
-              password:pword,
-              admin:0 };
-
-
-  userList.push(user);
-  console.log(userList);
+	newUser.save(function(err){
+		console.log("In save");
+		if(err){
+			throw err;
+		}
+		console.log(newUser);
+	});
+	//
+  // for(var i = 0; i < userList.length; i++ ){
+  //   if(req.body.userName == userList[i].user){
+  //     res.send("Failure. User already exists.");
+  //     return;
+  //   }
+  // }
+	//
+  // var user = {user:userName,
+  //             password:pword,
+  //             admin:0 };
+	//
+	//
+  // userList.push(user);
+  // console.log(userList);
   res.send("Success");
 });
 
