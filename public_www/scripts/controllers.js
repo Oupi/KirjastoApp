@@ -6,18 +6,19 @@ app.controller('LoginController', function($scope, $location, userFactory){
     .then(function(data){
       console.log(data.data);
       var token = data.data.token;
-      userFactory.setToken(token);
-      var user = data.data.user;
-      userFactory.setUser(user);
-      userFactory.setLogged(true);
+      if(token){
+        userFactory.setToken(token);
+        var user = data.data.user;
+        userFactory.setUser(user);
+        userFactory.setLogged(true);
 
-      if(token == "admin"){
-        userFactory.setAdmin(true);
+        if(token == "admin"){
+          userFactory.setAdmin(true);
+        }
+        $location.url("/list");
+        sessionStorage.setItem("token",token);
+        sessionStorage.setItem("user",user);
       }
-
-      $location.url("/list");
-      sessionStorage.setItem("token",token);
-      sessionStorage.setItem("user",user);
     }, function(reason){
       alert(reason.data);
     });
