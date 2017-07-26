@@ -34,7 +34,7 @@ app.controller('LoginController', function($scope, $location, userFactory){
   };
 });
 
-app.controller('ListController', function($scope, bookFactory){
+app.controller('ListController', function($scope, bookFactory, userFactory){
   var init = function(){
     bookFactory.getBooks().then(function(data){
     $scope.bookList = data.data;
@@ -42,6 +42,14 @@ app.controller('ListController', function($scope, bookFactory){
     } ,function(reason){
     console.log(reason.data);
     });
+  }
+
+  $scope.loanState = function(book){
+    if(book.loaned == ""){
+      return "Loan";
+    } else {
+      return "Return";
+    }
   }
 
   $scope.loan = function(book){
@@ -52,6 +60,17 @@ app.controller('ListController', function($scope, bookFactory){
         console.log(reason.data);
       });
   }
+
+  $scope.isMine = function(book){
+    if(book.loaned != ""){
+      if(book.loaned == userFactory.getUser()){
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return true;
+  };
 
   init();
 });

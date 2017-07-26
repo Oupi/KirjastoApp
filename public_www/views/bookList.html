@@ -13,7 +13,7 @@
         <td>{{book.title}}</td>
         <td>{{book.author}}</td>
         <td>{{book._id}}</td>
-        <td>Loaned: {{book.loaned}} <br/><button ng-click="loan(book)" class="btn btn-table">Loan</button></td>
+        <td>Loaned: {{book.loaned}} <br/><button ng-click="loan(book)" ng-show="isMine(book)" class="btn btn-table">{{loanState(book)}}</button></td>
       </tr>
     </tbody>
   </table>
