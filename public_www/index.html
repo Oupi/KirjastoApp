@@ -23,17 +23,20 @@
           <a class="navbar-brand" href="#">KirjastoAPPI</a>
         </div>
         <ul class="nav navbar-nav">
-          <li>
-            <a href="#/login">Login</a>
+          <li ng-hide="isLogged()">
+            <a href="#/login"><span class="glyphicon glyphicon-log-in"></span></a>
           </li>
           <li ng-show="isLogged()">
-            <a href="#/list">Book List</a>
+            <a href="#/list"><span class="glyphicon glyphicon-list"></span></a>
           </li>
           <li ng-show="isAdmin()">
-            <a href="#/admin/list">Admin Book List</a>
+            <a href="#/admin/list">A <span class="glyphicon glyphicon-list"></span></a>
           </li>
           <li ng-show="isAdmin()">
-            <a href="#/admin/add">Add Book</a>
+            <a href="#/admin/add"><span class="glyphicon glyphicon-plus-sign"></span></a>
+          </li>
+          <li ng-show="isLogged()">
+            <a href="#" ng-click="logOut()"><span class="glyphicon glyphicon-log-out"></span></a>
           </li>
         </ul>
       </div>

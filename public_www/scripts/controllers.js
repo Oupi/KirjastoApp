@@ -14,7 +14,7 @@ app.controller('LoginController', function($scope, $location, userFactory){
       if(token == "admin"){
         userFactory.setAdmin(true);
       }
-      
+
       $location.url("/list");
       sessionStorage.setItem("token",token);
       sessionStorage.setItem("user",user);
@@ -86,7 +86,7 @@ app.controller('AdminController', function($scope, $location, adminFactory, book
   init();
 });
 
-app.controller('UiController', function($scope, userFactory){
+app.controller('UiController', function($scope, $location, userFactory){
   $scope.isLogged = function(){
     return userFactory.isLogged();
   };
@@ -95,4 +95,13 @@ app.controller('UiController', function($scope, userFactory){
     return userFactory.isAdmin();
   };
 
+  $scope.logOut = function(){
+    userFactory.setLogged(false);
+    userFactory.setAdmin(false);
+    userFactory.setUser("");
+    userFactory.setToken("");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    $location.url("/login");
+  };
 });
