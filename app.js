@@ -38,21 +38,36 @@ app.post("/login", function(req, res){
 });
 
 app.post("/newUser", function(req,res){
-  var userName = req.body.userName;
-  var pword = req.body.pword;
+	var admin = 0;
 
-	console.log(userName);
-	console.log(pword);
-	var newUser = new User({userName:userName, pword:pword, admin:0});
-
-	newUser.save(function(err){
-		console.log("In save");
-		if(err){
-			throw err;
+	User.find().exec(function(err, items){
+		var count = items.length;
+		if(count == 0){
+			admin = 1;
 		}
-		console.log(newUser);
+		var userName = req.body.userName;
+	  var pword = req.body.pword;
+
+		console.log(userName);
+		console.log(pword);
+		User.find({"userName":userName}).exec(function(err, items){
+			var tempCount = items.length;
+			if(tempCount > 0){
+				res.status(403).send("Username already in use");
+				return;
+			}
+			var newUser = new User({userName:userName, pword:pword, admin:admin});
+			console.log(newUser);
+			newUser.save(function(err){
+				console.log("In save");
+				if(err){
+					throw err;
+				}
+				console.log(newUser);
+			});
+			res.send("Success");
+		});
 	});
-  res.send("Success");
 });
 
 app.use("/api/admin", adminRouter);
