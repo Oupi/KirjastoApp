@@ -1,0 +1,20 @@
+<div class="col-xs-6">
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>ID</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="book in bookList">
+        <td>{{book.title}}</td>
+        <td>{{book.author}}</td>
+        <td>{{book.id}}</td>
+        <td><br/><button ng-click="remove(book)" class="btn btn-table">Remove</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

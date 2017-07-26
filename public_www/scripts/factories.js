@@ -5,6 +5,7 @@ app.factory('userFactory', function($http){
   var token = "";
   var admin = false;
   var user = "";
+  var logged = false;
 
   factory.login = function(userName, password){
     var connection = $http({
@@ -51,7 +52,29 @@ app.factory('userFactory', function($http){
     user = u;
   };
 
+  factory.setLogged = function(u) {
+    logged = u;
+  };
 
+  factory.isLogged = function(){
+    return logged;
+  };
+
+  var init = function(){
+    var user = sessionStorage.getItem("user");
+    var token = sessionStorage.getItem("token");
+
+    if(user && token){
+      factory.setUser(user);
+      factory.setLogged(true);
+      if(token == "admin"){
+        factory.setAdmin(true);
+      }
+      factory.setToken(token);
+    }
+  };
+
+  init();
 
   return factory;
 });
@@ -78,4 +101,29 @@ app.factory('bookFactory', function($http, userFactory){
               });
   }
   return factory;
+});
+
+app.factory('adminFactory', function($http, userFactory){
+    var factory = {};
+
+    factory.addBook = function (title, author){
+      return $http({
+        method: "POST",
+        url: "api/admin/book",
+        data: {"title": title, "author": author},
+        headers: {"Content-Type":"application/json",
+                  "token":userFactory.getToken()}
+      });
+    };
+
+    factory.removeBook = function(book){
+      return $http({
+        method: "DELETE",
+        url: "api/admin/book",
+        data: {"id":book.id},
+        headers: {"Content-Type":"application/json",
+                  "token":userFactory.getToken()}
+      });
+    };
+    return factory;
 });

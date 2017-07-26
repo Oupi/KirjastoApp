@@ -4,6 +4,7 @@ var path        = require("path");
 
 var app = express();
 var userRouter = express.Router();
+var adminRouter = express.Router();
 
 app.use(bodyParser.json({extended:"true"}));
 
@@ -131,7 +132,55 @@ userRouter.get("/book", function(req, res) {
   res.send(bookList);
 });
 
+//////////////////////////////
+// Admin Router Starts Here //
+//////////////////////////////
+
+adminRouter.use(function(req, res, next){
+  var token = req.headers.token;
+  if(token == "admin"){
+    console.log("Authorized admin access");
+    console.log(req.headers);
+    next();
+  } else {
+    res.send("No cigar. Unauthorized access. Wrong token.")
+  }
+});
+
+
+adminRouter.post("/book", function(req, res){
+  // book: id, author, title
+	var tempId = bookList[bookList.length - 1].id + 1;
+	var book = {
+		"id": tempId,
+		"author": req.body.author,
+		"title": req.body.title,
+		"loaned":""
+	}
+
+	bookList.push(book);
+	console.log(bookList);
+	res.send("Done");
+});
+
+adminRouter.delete("/book", function(req, res){
+	var id = req.body.id;
+
+	for (var i = 0; i < bookList.length; i++) {
+
+		if(id == bookList[i].id){
+			bookList.splice(i, 1);
+		}
+	}
+	console.log(bookList);
+	res.send("Done");
+});
+
+
+app.use("/api/admin", adminRouter);
 app.use("/api", userRouter);
+
+
 
 app.listen(3000, function(){
   console.log("Listening port 3000...")
