@@ -95,7 +95,7 @@ app.factory('bookFactory', function($http, userFactory){
     return $http({
                 method: "POST",
                 url: "api/book",
-                data: {"id": book.id, "user":userFactory.getUser()},
+                data: {"id": book._id, "user":userFactory.getUser()},
                 headers: {"Content-Type":"application/json",
                           "token":userFactory.getToken()}
               });
@@ -120,7 +120,7 @@ app.factory('adminFactory', function($http, userFactory){
       return $http({
         method: "DELETE",
         url: "api/admin/book",
-        data: {"id":book.id},
+        data: {"id":book._id},
         headers: {"Content-Type":"application/json",
                   "token":userFactory.getToken()}
       });

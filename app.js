@@ -89,7 +89,7 @@ app.post("/login", function(req, res){
 				return;
 			}
 		}else {
-			res.status(403).send("No luck. Luke.");			
+			res.status(403).send("No luck. Luke.");
 		}
 	});
 });
@@ -142,30 +142,69 @@ userRouter.use(function(req, res, next){
 
 userRouter.post("/book", function(req, res){
   // book: id, author, title, loaned
-  for(var i = 0; i < bookList.length; i++){
-    if(req.body.id == bookList[i].id){
-      if(bookList[i].loaned != ""){
-        if(req.body.user == bookList[i].loaned){
-          bookList[i].loaned = "";
-          res.send({"id":bookList[i].id,"loaned":""});
-          console.log("Book" + bookList[i].id + "returned");
-          return;
-        }
-      } else {
-        console.log(req.body.user + " loaning book");
-        bookList[i].loaned = req.body.user;
-        res.send({"id":bookList[i].id,"loaned":bookList[i].loaned});
-        console.log("Book " + bookList[i].id + " loaned");
-        return;
-      }
-    }
-  }
-	res.send({"id":"No such book"});
+  // for(var i = 0; i < bookList.length; i++){
+  //   if(req.body.id == bookList[i].id){
+  //     if(bookList[i].loaned != ""){
+  //       if(req.body.user == bookList[i].loaned){
+  //         bookList[i].loaned = "";
+  //         res.send({"id":bookList[i].id,"loaned":""});
+  //         console.log("Book" + bookList[i].id + "returned");
+  //         return;
+  //       }
+  //     } else {
+  //       console.log(req.body.user + " loaning book");
+  //       bookList[i].loaned = req.body.user;
+  //       res.send({"id":bookList[i].id,"loaned":bookList[i].loaned});
+  //       console.log("Book " + bookList[i].id + " loaned");
+  //       return;
+  //     }
+  //   }
+  // }
+
+	Book.findById(req.body.id, function(err,item,count){
+		if(err){
+			throw err;
+		} else {
+			if(item.loaned != ""){
+				if(req.body.user == item.loaned){
+					item.loaned = "";
+					item.save(function(err,updatedItem){
+						if(err){
+							throw err;
+						}else {
+							res.send({
+								"id":updatedItem._id,
+								"loaned":updatedItem.loaned
+							});
+						}
+					});
+				} else {
+					res.status(403).send("Already loaned");
+				}
+			} else {
+				console.log("Loaning book.");
+				item.loaned = req.body.user;
+				item.save(function(err,updatedItem){
+					if(err){
+						throw err;
+					} else {
+						console.log("Succesful loan");
+						res.send({"id":updatedItem._id, "loaned":updatedItem.loaned});
+					}
+				});
+			}
+		}
+	});
 });
 
 userRouter.get("/book", function(req, res) {
-  console.log(bookList);
-  res.send(bookList);
+	Book.find(function(err, items, count){
+		if(err){
+			throw err;
+		}else {
+			res.send(JSON.stringify(items));
+		}
+	});
 });
 
 //////////////////////////////
@@ -185,33 +224,33 @@ adminRouter.use(function(req, res, next){
 
 
 adminRouter.post("/book", function(req, res){
-  // book: id, author, title
-	var tempId = bookList[bookList.length - 1].id + 1;
-	var book = {
-		"id": tempId,
+  // book: author, title, loaned
+	var book = new Book({
 		"author": req.body.author,
 		"title": req.body.title,
 		"loaned":""
-	}
+	});
 
-	bookList.push(book);
-	console.log(bookList);
-	res.send("Done");
+	book.save(function(err){
+		if(err){
+			throw err;
+		}
+		console.log(book);
+		res.send("Done");
+	});
 });
 
 adminRouter.delete("/book", function(req, res){
 	var id = req.body.id;
-
-	for (var i = 0; i < bookList.length; i++) {
-
-		if(id == bookList[i].id){
-			bookList.splice(i, 1);
+	console.log(id);
+	Book.remove({"_id":id}, function(err){
+		if(err){
+			throw err;
 		}
-	}
-	console.log(bookList);
-	res.send("Done");
+		console.log("Removed");
+		res.send("Removed");
+	});
 });
-
 
 app.use("/api/admin", adminRouter);
 app.use("/api", userRouter);
