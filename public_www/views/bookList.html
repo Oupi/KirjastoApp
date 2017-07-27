@@ -1,4 +1,9 @@
 <div class="col-xs-6">
+  <form class="form-inline">
+    <label for="search"></label>
+    <input type="text" name="search" ng-model="queryParam" class="form-control" placeholder="Search by Author">
+    <button name="button" ng-click="search()" class="btn btn-default">Search</button>
+  </form>
   <table class="table table-striped">
     <thead>
       <tr>

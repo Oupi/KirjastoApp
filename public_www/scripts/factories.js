@@ -2,10 +2,10 @@ var app = angular.module('Factories', []);
 
 app.factory('userFactory', function($http){
   var factory = {};
-  var token = "";
-  var admin = false;
-  var user = "";
-  var logged = false;
+  // var token = "";
+  // var admin = false;
+  // var user = "";
+  // var logged = false;
 
   factory.login = function(userName, password){
     var connection = $http({
@@ -37,48 +37,52 @@ app.factory('userFactory', function($http){
   };
 
   factory.setToken = function(t){
-    token = t;
+    console.log("SetToken: " + t);
+    localStorage.setItem("token", t);
   };
 
   factory.getToken = function(){
-    return token;
+    return localStorage.getItem("token");
   };
 
   factory.setAdmin = function(user) {
-    admin = user;
+    console.log("SetAdmin: " + user);
+    localStorage.setItem("admin", user);
   };
 
   factory.isAdmin = function(){
-    return admin;
+    return localStorage.getItem("admin");
   };
 
   factory.getUser = function() {
-    return user;
+    return localStorage.getItem("user");
   };
 
   factory.setUser = function(u) {
-    user = u;
+    console.log("SetUser: " + u);
+    localStorage.setItem("user", u);
   };
 
   factory.setLogged = function(u) {
-    logged = u;
+    console.log("SetLogged: "+ u);
+    localStorage.setItem("logged", u);
   };
 
   factory.isLogged = function(){
-    return logged;
+    return localStorage.getItem("logged");
   };
 
   var init = function(){
-    var user = sessionStorage.getItem("user");
-    var token = sessionStorage.getItem("token");
+    var user = factory.getUser();
+    console.log("User factory init user: " + user);
+    var token = factory.getToken();
+    console.log("User factory init token: " + token);
 
-    if(user && token){
-      factory.setUser(user);
+    if(user != null){
       factory.setLogged(true);
       if(token == "admin"){
         factory.setAdmin(true);
       }
-      factory.setToken(token);
     }
   };
 
@@ -90,10 +94,20 @@ app.factory('userFactory', function($http){
 app.factory('bookFactory', function($http, userFactory){
   var factory = {};
 
+
   factory.getBooks = function(){
     return $http({
                 method: "GET",
                 url: "api/book",
+                headers: {"Content-Type":"application/json",
+                          "token":userFactory.getToken()}
+              });
+  }
+
+  factory.getBooksByAuthor = function(queryParam){
+    return $http({
+                method: "GET",
+                url: "api/book?author=" + queryParam,
                 headers: {"Content-Type":"application/json",
                           "token":userFactory.getToken()}
               });

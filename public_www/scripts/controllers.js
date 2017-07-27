@@ -2,15 +2,7 @@ var app = angular.module('Controllers', ['Factories']);
 
 app.controller('LoginController', function($scope, $location, userFactory){
   var init = function(){
-    if(localStorage.getItem("user") != null){
-      var token = localStorage.getItem("token");
-      var user = localStorage.getItem("user");
-      userFactory.setToken(token);
-      userFactory.setLogged(true);
-      userFactory.setUser(user);
-      if(token == "admin"){
-        userFactory.setAdmin(true);
-      }
+    if(userFactory.getUser() != null){
       $location.url("/list");
     }
   };
@@ -28,10 +20,10 @@ app.controller('LoginController', function($scope, $location, userFactory){
 
         if(token == "admin"){
           userFactory.setAdmin(true);
+        }else {
+          userFactory.setAdmin(false);
         }
         $location.url("/list");
-        localStorage.setItem("token",token);
-        localStorage.setItem("user",user);
       }
     }, function(reason){
       alert(reason.data);
@@ -51,7 +43,7 @@ app.controller('LoginController', function($scope, $location, userFactory){
 
 app.controller('ListController', function($scope, bookFactory, userFactory){
   var init = function(){
-    if(localStorage.getItem("user") != null){
+    if(userFactory.getUser() != null){
       console.log("List Controller init");
       bookFactory.getBooks().then(function(data){
         $scope.bookList = data.data;
@@ -60,7 +52,8 @@ app.controller('ListController', function($scope, bookFactory, userFactory){
         console.log(reason.data);
       });
     }
-  }
+
+  };
 
   $scope.loanState = function(book){
     if(book.loaned == ""){
@@ -68,7 +61,7 @@ app.controller('ListController', function($scope, bookFactory, userFactory){
     } else {
       return "Return";
     }
-  }
+  };
 
   $scope.loan = function(book){
       bookFactory.loanBook(book).then(function(data){
@@ -88,6 +81,15 @@ app.controller('ListController', function($scope, bookFactory, userFactory){
       }
     }
     return true;
+  };
+
+  $scope.search = function(){
+    bookFactory.getBooksByAuthor($scope.queryParam).then(function(data){
+      $scope.bookList = data.data;
+      console.log(data.data);
+    } ,function(reason){
+      console.log(reason.data);
+    });
   };
 
   init();
@@ -134,18 +136,20 @@ app.controller('UiController', function($scope, $location, userFactory){
   };
 
   $scope.logOut = function(){
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
     userFactory.setLogged(false);
     userFactory.setAdmin(false);
-    userFactory.setUser("");
-    userFactory.setToken("");
+    userFactory.setUser(null);
+    userFactory.setToken(null);
 
     userFactory.logOut().then(function(data){
       console.log(data.data);
     }, function(reason){
       console.log(reason.data);
     });
-    $location.url("/login");
+    $scope.$apply(function(){
+      $location.path("/login");
+      $window.location.reload();
+    });
   };
+
 });

@@ -61,13 +61,25 @@ userRouter.post("/book", function(req, res){
 });
 
 userRouter.get("/book", function(req, res) {
-	Book.find(function(err, items, count){
-		if(err){
-			throw err;
-		}else {
-			res.send(JSON.stringify(items));
-		}
-	});
+  if(req.query.author){
+    var author = req.query.author;
+    Book.find({"author":author},function(err, items){
+      if(err){
+        throw err;
+      }else {
+        res.send(JSON.stringify(items));
+      }
+    });
+  }else {
+    Book.find(function(err, items, count){
+      if(err){
+        throw err;
+      }else {
+        res.send(JSON.stringify(items));
+      }
+    });
+  }
+
 });
 
 module.exports = userRouter;
