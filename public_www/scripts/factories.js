@@ -17,11 +17,10 @@ app.factory('userFactory', function($http){
 
     return connection;
   };
-  factory.logOut = function(userName){
+  factory.logOut = function(){
     var connection = $http({
       method:"POST",
       url:"logout",
-      data:{"userName":userName},
       headers:{"Content-Type":"application/json"}
     });
     return connection;

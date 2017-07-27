@@ -2,7 +2,7 @@ var app = angular.module('Controllers', ['Factories']);
 
 app.controller('LoginController', function($scope, $location, userFactory){
   var init = function(){
-    if(localStorage.getItem("token") && localStorage.getItem("user")){
+    if(localStorage.getItem("user") != null){
       var token = localStorage.getItem("token");
       var user = localStorage.getItem("user");
       userFactory.setToken(token);
@@ -51,12 +51,15 @@ app.controller('LoginController', function($scope, $location, userFactory){
 
 app.controller('ListController', function($scope, bookFactory, userFactory){
   var init = function(){
-    bookFactory.getBooks().then(function(data){
-    $scope.bookList = data.data;
-    console.log(data.data);
-    } ,function(reason){
-    console.log(reason.data);
-    });
+    if(localStorage.getItem("user") != null){
+      console.log("List Controller init");
+      bookFactory.getBooks().then(function(data){
+        $scope.bookList = data.data;
+        console.log(data.data);
+      } ,function(reason){
+        console.log(reason.data);
+      });
+    }
   }
 
   $scope.loanState = function(book){
@@ -131,17 +134,18 @@ app.controller('UiController', function($scope, $location, userFactory){
   };
 
   $scope.logOut = function(){
-    userFactory.logOut(userFactory.getUser()).then(function(data){
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    userFactory.setLogged(false);
+    userFactory.setAdmin(false);
+    userFactory.setUser("");
+    userFactory.setToken("");
 
-      userFactory.setLogged(false);
-      userFactory.setAdmin(false);
-      userFactory.setUser("");
-      userFactory.setToken("");
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      $location.url("/login");
+    userFactory.logOut().then(function(data){
+      console.log(data.data);
     }, function(reason){
       console.log(reason.data);
     });
+    $location.url("/login");
   };
 });
