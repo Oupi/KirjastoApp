@@ -2,6 +2,8 @@ var express     = require("express");
 var bodyParser  = require("body-parser");
 var path        = require("path");
 var mongoose		= require("mongoose");
+var session			= require("express-session");
+var mongoStore	= require("connect-mongo")(session);
 var config			= require("./backend/config");
 var userRouter 	= require("./backend/userRouter");
 var adminRouter = require("./backend/adminRouter");
@@ -11,30 +13,66 @@ var Book 				= require("./backend/models/book");
 
 var app 				= express();
 
+app.use(session({
+	secret:config.secret,
+	saveUninitialized:false,
+	resave:true,
+	cookie:{maxAge:1000*60*60*24},
+	store:new mongoStore({
+		collection:"session",
+		url:"mongodb://localhost/sessionDb",
+		ttl:24*60*60
+	})
+}));
+
 app.use(bodyParser.json({extended:"true"}));
 
 app.use(express.static(path.join(__dirname,"public_www")));
+
+app.use("/api", function(req, res, next){
+	if(req.session.token == req.headers.token){
+		console.log("Success: " + req.session.token);
+		next();
+	} else{
+		console.log("No success");
+		res.status(403).send("No chance. Wrong token. No access.");
+	}
+});
 
 mongoose.Promise = global.Promise;
 mongoose.connect(config.database, {useMongoClient:true});
 
 app.post("/login", function(req, res){
+
 	User.findOne({userName:req.body.userName}, function(err, user){
 		if(err){
 			throw err;
 		}
 		if(user){
-			if(user.admin == 1){
-				res.json({token:"admin", user:user.userName});
-				return;
-			}else{
-				res.json({token:"user", user:user.userName});
-				return;
+			if(user.pword == req.body.pword){
+				if(user.admin == 1){
+					req.session.token = "admin";
+					res.json({token:"admin", user:user.userName});
+					return;
+				} else {
+					req.session.token = "user";
+					res.json({token:"user", user:user.userName});
+					return;
+				}
+			}	else {
+				res.status(403).send("No luck. Luke.");
 			}
-		}else {
+		}	else {
 			res.status(403).send("No luck. Luke.");
 		}
 	});
+});
+
+app.post("/logout", function(req,res){
+	if(req.session){
+		req.session.destroy();
+	}
+	res.send("Logged out");
 });
 
 app.post("/newUser", function(req,res){

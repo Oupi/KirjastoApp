@@ -9,12 +9,21 @@ app.factory('userFactory', function($http){
 
   factory.login = function(userName, password){
     var connection = $http({
-          method:"POST",
-          url:"login",
-          data:{"userName":userName,"pword":password},
-          headers:{"Content-Type":"application/json"}
-          });
+      method:"POST",
+      url:"login",
+      data:{"userName":userName,"pword":password},
+      headers:{"Content-Type":"application/json"}
+    });
 
+    return connection;
+  };
+  factory.logOut = function(userName){
+    var connection = $http({
+      method:"POST",
+      url:"logout",
+      data:{"userName":userName},
+      headers:{"Content-Type":"application/json"}
+    });
     return connection;
   };
   factory.register = function(userName, password){

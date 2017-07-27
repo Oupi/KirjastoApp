@@ -1,6 +1,20 @@
 var app = angular.module('Controllers', ['Factories']);
 
 app.controller('LoginController', function($scope, $location, userFactory){
+  var init = function(){
+    if(localStorage.getItem("token") && localStorage.getItem("user")){
+      var token = localStorage.getItem("token");
+      var user = localStorage.getItem("user");
+      userFactory.setToken(token);
+      userFactory.setLogged(true);
+      userFactory.setUser(user);
+      if(token == "admin"){
+        userFactory.setAdmin(true);
+      }
+      $location.url("/list");
+    }
+  };
+
   $scope.login = function(){
     userFactory.login($scope.userName, $scope.pword)
     .then(function(data){
@@ -16,8 +30,8 @@ app.controller('LoginController', function($scope, $location, userFactory){
           userFactory.setAdmin(true);
         }
         $location.url("/list");
-        sessionStorage.setItem("token",token);
-        sessionStorage.setItem("user",user);
+        localStorage.setItem("token",token);
+        localStorage.setItem("user",user);
       }
     }, function(reason){
       alert(reason.data);
@@ -32,6 +46,7 @@ app.controller('LoginController', function($scope, $location, userFactory){
       alert(reason.data);
     });
   };
+  init();
 });
 
 app.controller('ListController', function($scope, bookFactory, userFactory){
@@ -116,12 +131,17 @@ app.controller('UiController', function($scope, $location, userFactory){
   };
 
   $scope.logOut = function(){
-    userFactory.setLogged(false);
-    userFactory.setAdmin(false);
-    userFactory.setUser("");
-    userFactory.setToken("");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("token");
-    $location.url("/login");
+    userFactory.logOut(userFactory.getUser()).then(function(data){
+
+      userFactory.setLogged(false);
+      userFactory.setAdmin(false);
+      userFactory.setUser("");
+      userFactory.setToken("");
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      $location.url("/login");
+    }, function(reason){
+      console.log(reason.data);
+    });
   };
 });

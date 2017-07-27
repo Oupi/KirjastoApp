@@ -11,16 +11,16 @@ mongoose.connect(config.database, {useMongoClient:true});
 
 var userRouter = express.Router();
 
-userRouter.use(function(req, res, next){
-  var token = req.headers.token;
-  if(token == "user" || token == "admin"){
-    console.log("Authorized access");
-    console.log(req.headers);
-    next();
-  } else {
-    res.send("No cigar. Unauthorized access. Wrong token.")
-  }
-});
+// userRouter.use(function(req, res, next){
+//   var token = req.headers.token;
+//   if(token == "user" || token == "admin"){
+//     console.log("Authorized access");
+//     console.log(req.headers);
+//     next();
+//   } else {
+//     res.send("No cigar. Unauthorized access. Wrong token.")
+//   }
+// });
 
 userRouter.post("/book", function(req, res){
   // book: id, author, title, loaned
